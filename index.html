@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="my">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>စာအုပ်စင် Mini App</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Telegram Web App Script -->
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        /* Custom Font */
+        @import url('https://fonts.googleapis.com/css2?family=Padauk:wght@400;700&display=swap');
+        body {
+            font-family: 'Padauk', sans-serif;
+            background-color: #f0ead6; /* စာအုပ်စင်နဲ့လိုက်ဖက်တဲ့ အရောင် */
+        }
+        .bookshelf {
+            background-image: url('https://www.transparenttextures.com/patterns/wood-pattern.png');
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+        }
+        .book-item {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .book-item:hover {
+            transform: translateY(-10px) scale(1.05);
+            box-shadow: 0 15px 25px rgba(0,0,0,0.3);
+        }
+        #pdf-viewer-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 100;
+            background-color: rgba(0,0,0,0.8);
+            display: none; /* ပုံမှန်အားဖြင့် ဖျောက်ထားမယ် */
+            flex-direction: column;
+        }
+        #pdf-iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+        #back-button {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            z-index: 110;
+        }
+    </style>
+</head>
+<body class="bg-[#f0ead6] text-gray-800">
+
+    <!-- Main Page (စာအုပ်စင်) -->
+    <div id="main-page" class="p-4">
+        <header class="text-center my-6">
+            <h1 class="text-4xl font-bold text-stone-700">ကျွန်ုပ်၏ စာအုပ်စင်</h1>
+            <p class="text-stone-500 mt-2">သင်အကြိုက်ဆုံးစာအုပ်များကို ရှာဖွေဖတ်ရှုပါ</p>
+        </header>
+
+        <main>
+            <!-- လူကြိုက်အများဆုံး စာအုပ်များ -->
+            <section id="popular-books" class="mb-12">
+                <h2 class="text-2xl font-bold mb-4 pb-2 border-b-2 border-stone-400 text-stone-600">လူကြိုက်အများဆုံး</h2>
+                <div class="bookshelf p-6 rounded-lg">
+                    <div id="popular-books-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
+                        <!-- စာအုပ်များကို JavaScript ဖြင့် ဖြည့်စွက်ပါမည် -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- နောက်ဆုံးထွက် စာအုပ်များ -->
+            <section id="latest-books">
+                <h2 class="text-2xl font-bold mb-4 pb-2 border-b-2 border-stone-400 text-stone-600">နောက်ဆုံးထွက်</h2>
+                 <div class="bookshelf p-6 rounded-lg">
+                    <div id="latest-books-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
+                        <!-- စာအုပ်များကို JavaScript ဖြင့် ဖြည့်စွက်ပါမည် -->
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- PDF Reader Page -->
+    <div id="pdf-viewer-container">
+        <button id="back-button" class="bg-white text-gray-800 font-bold py-2 px-4 rounded-full shadow-lg">
+            &larr; နောက်သို့
+        </button>
+        <iframe id="pdf-iframe" title="PDF Viewer"></iframe>
+    </div>
+
+    <script>
+        // --- အချက်အလက်များ ---
+        // ဒီနေရာမှာ သင့်ရဲ့ စာအုပ်အချက်အလက်တွေကို ထည့်သွင်းရမှာပါ။
+        // thumbnailUrl နှင့် pdfUrl တို့ကို အင်တာနက်ပေါ်မှာ တင်ထားတဲ့ လိပ်စာ (URL) အမှန်ဖြင့် ပြောင်းထည့်ပါ။
+        const books = [
+            { 
+                id: 1, 
+                title: 'နမူနာ စာအုပ် ၁', 
+                thumbnailUrl: 'https://javmyanmar.com/wp-content/uploads/2025/08/OIP.webp',
+                pdfUrl: 'https://javmyanmar.com/wp-content/uploads/2025/08/Untitled-document-1.pdf',
+                category: 'popular' 
+            },
+            { 
+                id: 2, 
+                title: 'နမူနာ စာအုပ် ၂', 
+                thumbnailUrl: 'https://javmyanmar.com/wp-content/uploads/2025/08/OIP.webp',
+                pdfUrl: 'https://javmyanmar.com/wp-content/uploads/2025/08/Untitled-document-1.pdf',
+                category: 'popular' 
+            },
+            { 
+                id: 3, 
+                title: 'နမူနာ စာအုပ် ၃', 
+                thumbnailUrl: 'https://javmyanmar.com/wp-content/uploads/2025/08/OIP.webp',
+                pdfUrl: 'https://javmyanmar.com/wp-content/uploads/2025/08/Untitled-document-1.pdf',
+                category: 'latest' 
+            },
+            { 
+                id: 4, 
+                title: 'နမူနာ စာအုပ် ၄', 
+                thumbnailUrl: 'https://javmyanmar.com/wp-content/uploads/2025/08/OIP.webp',
+                pdfUrl: 'hhttps://javmyanmar.com/wp-content/uploads/2025/08/Untitled-document-1.pdf',
+                category: 'latest' 
+            },
+             { 
+                id: 5, 
+                title: 'နမူနာ စာအုပ် ၅', 
+                thumbnailUrl: 'https://javmyanmar.com/wp-content/uploads/2025/08/OIP.webp',
+                pdfUrl: 'https://javmyanmar.com/wp-content/uploads/2025/08/Untitled-document-1.pdf',
+                category: 'popular' 
+            },
+        ];
+
+        // --- လုပ်ဆောင်ချက်များ ---
+        document.addEventListener('DOMContentLoaded', function() {
+            const tg = window.Telegram.WebApp;
+            tg.ready();
+
+            const popularBooksGrid = document.getElementById('popular-books-grid');
+            const latestBooksGrid = document.getElementById('latest-books-grid');
+            const mainPage = document.getElementById('main-page');
+            const pdfViewerContainer = document.getElementById('pdf-viewer-container');
+            const pdfIframe = document.getElementById('pdf-iframe');
+            const backButton = document.getElementById('back-button');
+
+            // စာအုပ်များကို သက်ဆိုင်ရာ category အလိုက် ခွဲထုတ်ပြီး display လုပ်ခြင်း
+            books.forEach(book => {
+                const bookElement = createBookElement(book);
+                if (book.category === 'popular') {
+                    popularBooksGrid.appendChild(bookElement);
+                } else if (book.category === 'latest') {
+                    latestBooksGrid.appendChild(bookElement);
+                }
+            });
+
+            // စာအုပ်တစ်ခုကို နှိပ်လိုက်သည့်အခါ PDF viewer ကိုပြသခြင်း
+            function openPdfViewer(pdfUrl) {
+                // PDF.js viewer ကို iframe ထဲမှာ ထည့်သွင်းအသုံးပြုခြင်း
+                // file parameter ဖြင့် ကိုယ့်ရဲ့ PDF URL ကို ပို့ပေးရပါမယ်။
+                pdfIframe.src = `https://mozilla.github.io/pdf.js/web/viewer.html?file=${encodeURIComponent(pdfUrl)}`;
+                mainPage.style.display = 'none';
+                pdfViewerContainer.style.display = 'flex';
+                tg.BackButton.show(); // Telegram ရဲ့ နောက်ပြန်ခလုတ်ကို ပြပါ
+            }
+
+            // နောက်သို့ ခလုတ်ကို နှိပ်သည့်အခါ စာအုပ်စင်ကို ပြန်သွားခြင်း
+            function closePdfViewer() {
+                mainPage.style.display = 'block';
+                pdfViewerContainer.style.display = 'none';
+                pdfIframe.src = ''; // iframe ကိုရှင်းလင်းခြင်း
+                tg.BackButton.hide(); // Telegram ရဲ့ နောက်ပြန်ခလုတ်ကို ဖျောက်ပါ
+            }
+            
+            // HTML ထဲမှာရှိတဲ့ ကိုယ်ပိုင်ခလုတ်
+            backButton.addEventListener('click', closePdfViewer);
+            
+            // Telegram ရဲ့ နောက်ပြန်ခလုတ်
+            tg.BackButton.onClick(closePdfViewer);
+
+            // စာအုပ် card တစ်ခုကို ဖန်တီးတဲ့ function
+            function createBookElement(book) {
+                const div = document.createElement('div');
+                div.className = 'book-item cursor-pointer group';
+                div.innerHTML = `
+                    <img src="${book.thumbnailUrl}" alt="${book.title}" class="w-full h-auto object-cover rounded-lg shadow-md group-hover:shadow-xl">
+                    <h3 class="mt-2 text-md font-bold text-center text-stone-700 truncate">${book.title}</h3>
+                `;
+                div.addEventListener('click', () => openPdfViewer(book.pdfUrl));
+                return div;
+            }
+        });
+    </script>
+</body>
+</html>
