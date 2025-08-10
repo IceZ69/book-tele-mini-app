@@ -177,28 +177,3 @@
     </script>
 </body>
 </html>
-```
-
-### ဘာတွေပြောင်းလဲသွားလဲ?
-
-အဓိကပြောင်းလဲလိုက်တဲ့ တစ်ကြောင်းတည်းသောကုဒ်က `openPdfViewer` function ထဲမှာပါ:
-
-```javascript
-// အရင်ကုဒ် (Proxy အသုံးပြု)
-// const proxyPrefix = 'https://api.allorigins.win/raw?url=';
-// const finalPdfUrl = proxyPrefix + pdfUrl;
-// pdfIframe.src = `https://mozilla.github.io/pdf.js/web/viewer.html?file=${encodeURIComponent(finalPdfUrl)}`;
-
-// အခုကုဒ် (Google Viewer အသုံးပြု)
-const viewerUrl = `https://docs.google.com/gview?url=${encodeURIComponent(pdfUrl)}&embedded=true`;
-pdfIframe.src = viewerUrl;
-```
-
-### လုပ်ဆောင်ရန်
-
-1.  အပေါ်က ပြင်ဆင်ပြီးသားကုဒ်အပြည့်အစုံကို copy ကူးပါ။
-2.  သင့်ရဲ့ `index.html` ဖိုင်ထဲမှာ အရင်ကုဒ်အဟောင်းနေရာမှာ အခုကုဒ်အသစ်နဲ့ အစားထိုးလိုက်ပါ။
-3.  ဖိုင်ကို save ပြီး သင့်ရဲ့ hosting (ဥပမာ- GitHub Pages) မှာ update ပြန်လုပ်ပါ။
-4.  ပြီးရင် Telegram Bot ထဲက Mini App ကို ပြန်ဖွင့်ပြီး စာအုပ်တစ်အုပ်ကိုနှိပ်ပြီး စမ်းသပ်ကြည့်ပါ။
-
-ဒီတစ်ခါတော့ သင့်ရဲ့ PDF ဖိုင်တွေအားလုံး အဆင်ပြေပြေ ပေါ်လာပါလိမ့်မယ်။ အခက်အခဲတစ်စုံတစ်ရာရှိနေသေးရင် ထပ်မံအသိပေးပါခင်ဗ
