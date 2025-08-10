@@ -97,38 +97,24 @@
         const books = [
             { 
                 id: 1, 
-                title: 'နမူနာ စာအုပ် ၁', 
+                title: 'သူငယ်ချင်းမို့ပါ', 
                 thumbnailUrl: 'https://javmyanmar.com/wp-content/uploads/2025/08/OIP.webp',
-                pdfUrl: 'https://javmyanmar.com/wp-content/uploads/2025/08/Untitled-document-1.pdf',
+                pdfUrl: 'https://javmyanmar.com/wp-content/uploads/2025/08/Untitled-document-1.pdf', // This URL works because w3.org allows it.
                 category: 'popular' 
             },
             { 
                 id: 2, 
-                title: 'နမူနာ စာအုပ် ၂', 
+                title: 'သူငယ်ချင်းမို့ပါ', 
                 thumbnailUrl: 'https://javmyanmar.com/wp-content/uploads/2025/08/OIP.webp',
-                pdfUrl: 'https://javmyanmar.com/wp-content/uploads/2025/08/Untitled-document-1.pdf',
+                pdfUrl: 'https://javmyanmar.com/wp-content/uploads/2025/08/Untitled-document-1.pdf', // This one might be blocked by CORS.
                 category: 'popular' 
             },
             { 
                 id: 3, 
-                title: 'နမူနာ စာအုပ် ၃', 
+                title: 'သူငယ်ချင်းမို့ပါ', 
                 thumbnailUrl: 'https://javmyanmar.com/wp-content/uploads/2025/08/OIP.webp',
                 pdfUrl: 'https://javmyanmar.com/wp-content/uploads/2025/08/Untitled-document-1.pdf',
                 category: 'latest' 
-            },
-            { 
-                id: 4, 
-                title: 'နမူနာ စာအုပ် ၄', 
-                thumbnailUrl: 'https://javmyanmar.com/wp-content/uploads/2025/08/OIP.webp',
-                pdfUrl: 'hhttps://javmyanmar.com/wp-content/uploads/2025/08/Untitled-document-1.pdf',
-                category: 'latest' 
-            },
-             { 
-                id: 5, 
-                title: 'နမူနာ စာအုပ် ၅', 
-                thumbnailUrl: 'https://javmyanmar.com/wp-content/uploads/2025/08/OIP.webp',
-                pdfUrl: 'https://javmyanmar.com/wp-content/uploads/2025/08/Untitled-document-1.pdf',
-                category: 'popular' 
             },
         ];
 
@@ -144,7 +130,6 @@
             const pdfIframe = document.getElementById('pdf-iframe');
             const backButton = document.getElementById('back-button');
 
-            // စာအုပ်များကို သက်ဆိုင်ရာ category အလိုက် ခွဲထုတ်ပြီး display လုပ်ခြင်း
             books.forEach(book => {
                 const bookElement = createBookElement(book);
                 if (book.category === 'popular') {
@@ -156,29 +141,31 @@
 
             // စာအုပ်တစ်ခုကို နှိပ်လိုက်သည့်အခါ PDF viewer ကိုပြသခြင်း
             function openPdfViewer(pdfUrl) {
+                // --- အရေးကြီးသော ပြင်ဆင်မှု ---
+                // CORS ပြဿနာကို ဖြေရှင်းရန် ကြားခံ proxy ကို အသုံးပြုခြင်း။
+                // This proxy adds the required CORS headers to the request.
+                const proxyPrefix = 'https://api.allorigins.win/raw?url=';
+                const finalPdfUrl = proxyPrefix + pdfUrl;
+                
                 // PDF.js viewer ကို iframe ထဲမှာ ထည့်သွင်းအသုံးပြုခြင်း
-                // file parameter ဖြင့် ကိုယ့်ရဲ့ PDF URL ကို ပို့ပေးရပါမယ်။
-                pdfIframe.src = `https://mozilla.github.io/pdf.js/web/viewer.html?file=${encodeURIComponent(pdfUrl)}`;
+                // file parameter ဖြင့် proxy ထည့်ပြီးသား PDF URL ကို ပို့ပေးရပါမယ်။
+                pdfIframe.src = `https://mozilla.github.io/pdf.js/web/viewer.html?file=${encodeURIComponent(finalPdfUrl)}`;
+                
                 mainPage.style.display = 'none';
                 pdfViewerContainer.style.display = 'flex';
-                tg.BackButton.show(); // Telegram ရဲ့ နောက်ပြန်ခလုတ်ကို ပြပါ
+                tg.BackButton.show();
             }
 
-            // နောက်သို့ ခလုတ်ကို နှိပ်သည့်အခါ စာအုပ်စင်ကို ပြန်သွားခြင်း
             function closePdfViewer() {
                 mainPage.style.display = 'block';
                 pdfViewerContainer.style.display = 'none';
-                pdfIframe.src = ''; // iframe ကိုရှင်းလင်းခြင်း
-                tg.BackButton.hide(); // Telegram ရဲ့ နောက်ပြန်ခလုတ်ကို ဖျောက်ပါ
+                pdfIframe.src = ''; 
+                tg.BackButton.hide();
             }
             
-            // HTML ထဲမှာရှိတဲ့ ကိုယ်ပိုင်ခလုတ်
             backButton.addEventListener('click', closePdfViewer);
-            
-            // Telegram ရဲ့ နောက်ပြန်ခလုတ်
             tg.BackButton.onClick(closePdfViewer);
 
-            // စာအုပ် card တစ်ခုကို ဖန်တီးတဲ့ function
             function createBookElement(book) {
                 const div = document.createElement('div');
                 div.className = 'book-item cursor-pointer group';
